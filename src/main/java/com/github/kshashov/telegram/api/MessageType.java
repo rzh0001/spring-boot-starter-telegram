@@ -67,6 +67,7 @@ public enum MessageType {
     POLL,
 
     NEW_MEMBER,
+    LEFT_MEMBER,
 
     /**
      * For new types of telegram requests that are not yet supported.

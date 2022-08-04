@@ -45,6 +45,9 @@ public class TelegramEvent {
     @Nullable
     private User user;
 
+    @Nullable
+    private User[] member;
+
     /**
      * The first non-empty object, if any, among:
      * <ul>
@@ -84,16 +87,28 @@ public class TelegramEvent {
         if (message != null) {
             this.user = firstNonNull(message.from(), message.leftChatMember(), message.forwardFrom());
             this.chat = firstNonNull(message.chat(), message.forwardFromChat());
-            this.text = message.text();
-            if (update.editedMessage() != null) {
-                this.messageType = MessageType.EDITED_MESSAGE;
-            } else if (update.channelPost() != null) {
-                this.messageType = MessageType.CHANNEL_POST;
-            } else if (update.editedChannelPost() != null) {
-                this.messageType = MessageType.EDITED_CHANNEL_POST;
-            } else {
-                this.messageType = MessageType.MESSAGE;
+            if (message.text() == null) {
+                if (message.leftChatMember() != null) {
+                    this.messageType = MessageType.LEFT_MEMBER;
+                } else if (message.newChatMembers() != null) {
+                    this.member = message.newChatMembers();
+                    this.messageType = MessageType.NEW_MEMBER;
+                } else {
+                    this.messageType = MessageType.MESSAGE;
+                }
+            }else {
+                this.text = message.text();
+                if (update.editedMessage() != null) {
+                    this.messageType = MessageType.EDITED_MESSAGE;
+                } else if (update.channelPost() != null) {
+                    this.messageType = MessageType.CHANNEL_POST;
+                } else if (update.editedChannelPost() != null) {
+                    this.messageType = MessageType.EDITED_CHANNEL_POST;
+                } else {
+                    this.messageType = MessageType.MESSAGE;
+                }
             }
+
         } else if (update.inlineQuery() != null) {
             InlineQuery inlineQuery = update.inlineQuery();
             this.user = inlineQuery.from();
@@ -129,11 +144,6 @@ public class TelegramEvent {
             this.text = update.poll().question();
             this.chat = null;
             this.messageType = MessageType.POLL;
-        } else if (update.chatMember() != null){
-            this.user = null;
-            this.text = update.poll().question();
-            this.chat = null;
-            this.messageType = MessageType.NEW_MEMBER;
         } else {
             this.user = null;
             this.text = null;
