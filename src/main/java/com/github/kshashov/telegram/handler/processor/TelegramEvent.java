@@ -37,13 +37,13 @@ public class TelegramEvent {
      * Сhat instance if it present in the current telegram request.
      */
     @Nullable
-    private final Chat chat;
+    private Chat chat;
 
     /**
      * User instance if it present in the current telegram request.
      */
     @Nullable
-    private final User user;
+    private User user;
 
     /**
      * The first non-empty object, if any, among:
@@ -57,7 +57,7 @@ public class TelegramEvent {
      * </ul>
      */
     @Nullable
-    private final String text;
+    private String text;
 
     /**
      * Bot instance that received the current telegram event.
@@ -68,7 +68,7 @@ public class TelegramEvent {
     /**
      * Type of the current telegram request.
      */
-    private final @NotNull MessageType messageType;
+    private @NotNull MessageType messageType;
 
     private final String token;
 
@@ -129,6 +129,11 @@ public class TelegramEvent {
             this.text = update.poll().question();
             this.chat = null;
             this.messageType = MessageType.POLL;
+        } else if (update.chatMember() != null){
+            this.user = null;
+            this.text = update.poll().question();
+            this.chat = null;
+            this.messageType = MessageType.NEW_MEMBER;
         } else {
             this.user = null;
             this.text = null;
